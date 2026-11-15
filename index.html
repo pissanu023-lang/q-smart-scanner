@@ -24,7 +24,7 @@
 <section id="camera" class="hide"><div class="panel" style="margin-top:0"><h2>📷 สแกนเอกสารแบบสด</h2><div class="camera-box" id="cameraBox"><video id="liveVideo" autoplay playsinline muted></video><canvas id="liveOverlay"></canvas></div><div class="live-status" id="liveStatus">กำลังเปิดกล้อง…</div><div class="cam-controls"><button class="secondary" id="closeCamera">ยกเลิก</button><button class="primary shutter" id="takePhoto">📸 ถ่าย</button></div><p class="hint">กรอบเหลือง = กำลังหาเอกสาร • กรอบเขียว = ตรวจพบขอบแล้ว หลังถ่ายยังลากแก้มุมได้</p></div></section>
 <section id="editor" class="hide"><div class="panel" style="margin-top:0"><h2>ปรับมุมเอกสาร <span class="muted" id="pageLabel"></span></h2><div class="preview-wrap" id="previewWrap"><canvas id="preview"></canvas></div><p class="hint">ลากวงกลมสีเขียว 4 มุมให้ตรงขอบกระดาษ แล้วกด “ตัดและปรับให้ตรง”</p><div class="actions"><button class="secondary" id="autoBtn">✨ จับขอบอัตโนมัติ</button><button class="primary" id="cropBtn">✓ ตัดและปรับให้ตรง</button></div><div class="status" id="detectStatus"></div></div></section>
 <section id="result" class="hide"><div class="panel" style="margin-top:0"><h2>ตัวอย่างเอกสารที่สแกน</h2><div class="preview-wrap" style="background:#dde8f8;touch-action:auto"><canvas id="resultCanvas"></canvas></div><div class="modes" id="modes"><button class="mode active" data-mode="color">สี</button><button class="mode" data-mode="gray">ขาวดำ</button><button class="mode" data-mode="document">เอกสารคมชัด</button></div><div class="actions"><button class="secondary" id="editCorners">↶ ปรับมุมใหม่</button><button class="primary" id="keepPage">✓ เก็บหน้านี้</button></div></div></section>
-<section id="pages" class="panel hide"><h2>เอกสารของฉัน <span class="muted" id="count">0 หน้า</span></h2><div class="thumbs" id="thumbs"></div><p class="hint">แตะรูปเล็กเพื่อดูหน้า • PDF จะเรียงหน้าตามลำดับที่สแกน</p><div class="actions"><button class="secondary" id="addPage">＋ เพิ่มหน้า</button><button class="primary" id="savePDF">📕 บันทึก PDF</button><button class="primary" id="saveJPG">🖼️ บันทึก JPG</button><button class="secondary" id="sharePhoto">📲 แชร์รูปที่เลือก</button><button class="primary" id="shareAllPhotos">📲 แชร์รูปทั้งหมดเข้าอัลบั้ม</button></div><div class="actions" style="margin-top:8px"><button class="danger" id="deletePage">ลบหน้าที่เลือก</button><button class="secondary" id="newScan">กลับหน้าแรก</button></div><div class="status" id="saveStatus"></div></section>
+<section id="pages" class="panel hide"><h2>เอกสารของฉัน <span class="muted" id="count">0 หน้า</span></h2><div class="thumbs" id="thumbs"></div><p class="hint">แตะรูปเล็กเพื่อดูหน้า • PDF จะเรียงหน้าตามลำดับที่สแกน</p><div class="actions"><button class="secondary" id="addPage">＋ เพิ่มหน้า</button><button class="primary" id="savePDF">📕 บันทึก PDF</button><button class="secondary" id="sharePDF">📤 แชร์ไฟล์ PDF</button><button class="primary" id="saveJPG">🖼️ บันทึก JPG</button><button class="secondary" id="sharePhoto">📲 แชร์รูปที่เลือก</button><button class="primary" id="shareAllPhotos">📲 แชร์รูปทั้งหมดเข้าอัลบั้ม</button></div><div class="actions" style="margin-top:8px"><button class="danger" id="deletePage">ลบหน้าที่เลือก</button><button class="secondary" id="newScan">กลับหน้าแรก</button></div><div class="status" id="saveStatus"></div></section>
 <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hide"><input id="galleryInput" type="file" accept="image/*" multiple class="hide">
 <footer class="footer">Q Smart Scanner • เอกสารประมวลผลในเครื่องของคุณ<br>ฟังก์ชันตรวจขอบอัตโนมัติต้องใช้อินเทอร์เน็ตเพื่อโหลดตัวประมวลผลครั้งแรก</footer></main></div>
 <script src="https://docs.opencv.org/4.x/opencv.js" async onload="cvScriptLoaded()" onerror="cvLoadFailed()"></script>
@@ -152,12 +152,38 @@ function renderMode(){if(!cropped)return;const c=$('resultCanvas');c.width=cropp
 $('cropBtn').onclick=()=>{try{cropped=warpPerspective();mode='color';renderMode();show('result')}catch(e){alert('ปรับมุมไม่สำเร็จ กรุณาลองใหม่')}};
 $('autoBtn').onclick=detectCorners;$('editCorners').onclick=()=>show('editor');document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;renderMode()});
 $('keepPage').onclick=()=>{if(!processed)return;pages.push(processed.toDataURL('image/jpeg',.92));selected=pages.length-1;source=null;renderPages();show('pages')};
-function renderPages(){$('count').textContent=pages.length+' หน้า';const root=$('thumbs');root.innerHTML='';pages.forEach((url,i)=>{const btn=document.createElement('button');btn.className='thumb'+(selected===i?' active':'');const im=document.createElement('img');im.src=url;im.alt='หน้าที่ '+(i+1);const tag=document.createElement('span');tag.textContent=i+1;btn.append(im,tag);btn.onclick=()=>{selected=i;renderPages()};root.append(btn)});$('saveStatus').textContent=pages.length?'สแกนแล้ว ' + pages.length + ' รูป • แตะ “แชร์รูปทั้งหมดเข้าอัลบั้ม” เพื่อส่งรูปหลายใบพร้อมกัน หรือเลือกบันทึก PDF':'ยังไม่มีเอกสาร'}
+function renderPages(){$('count').textContent=pages.length+' หน้า';const root=$('thumbs');root.innerHTML='';pages.forEach((url,i)=>{const btn=document.createElement('button');btn.className='thumb'+(selected===i?' active':'');const im=document.createElement('img');im.src=url;im.alt='หน้าที่ '+(i+1);const tag=document.createElement('span');tag.textContent=i+1;btn.append(im,tag);btn.onclick=()=>{selected=i;renderPages()};root.append(btn)});$('saveStatus').textContent=pages.length?'สแกนแล้ว ' + pages.length + ' รูป • แชร์รูปทั้งหมดเพื่อเก็บในแอปรูปภาพ หรือแชร์ PDF ไป LINE และแอปไฟล์':'ยังไม่มีเอกสาร'}
 $('deletePage').onclick=()=>{if(!pages.length)return;if(!confirm('ลบหน้าที่ '+(selected+1)+' ออกจากชุดเอกสารนี้?'))return;pages.splice(selected,1);selected=Math.max(0,Math.min(selected,pages.length-1));renderPages();if(!pages.length)show('home')};
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)}
 function dataBlob(data){const [info,b64]=data.split(','),bin=atob(b64),out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return new Blob([out],{type:'image/jpeg'})}
 function saveJpg(){if(!pages.length){alert('กรุณาสแกนเอกสารก่อน');return}downloadBlob(dataBlob(pages[selected]),`Q-Scan-page-${selected+1}.jpg`);$('saveStatus').textContent='บันทึกรูปหน้าที่ '+(selected+1)+' แล้ว'}
-function savePdf(){if(!pages.length){alert('กรุณาสแกนเอกสารก่อน');return}if(!window.jspdf){alert('ยังโหลดส่วนสร้าง PDF ไม่สำเร็จ กรุณาเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่');return}const doc=new jspdf.jsPDF({unit:'mm',format:'a4'});const add=idx=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{if(idx)doc.addPage();const pw=210,ph=297,pad=8,scale=Math.min((pw-2*pad)/im.width,(ph-2*pad)/im.height),w=im.width*scale,h=im.height*scale;doc.addImage(pages[idx],'JPEG',(pw-w)/2,(ph-h)/2,w,h,undefined,'FAST');resolve()};im.onerror=reject;im.src=pages[idx]});(async()=>{try{for(let i=0;i<pages.length;i++)await add(i);doc.save('Q-Smart-Scanner.pdf');$('saveStatus').textContent='สร้าง PDF รวม '+pages.length+' หน้าแล้ว'}catch(e){alert('สร้าง PDF ไม่สำเร็จ')}})()}
+async function buildPdfBlob(){
+ if(!pages.length)throw new Error('กรุณาสแกนเอกสารก่อน');
+ if(!window.jspdf)throw new Error('ยังโหลดส่วนสร้าง PDF ไม่สำเร็จ กรุณาเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่');
+ const doc=new jspdf.jsPDF({unit:'mm',format:'a4'});
+ for(let idx=0;idx<pages.length;idx++){
+  const im=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=pages[idx]});
+  if(idx)doc.addPage();
+  const pw=210,ph=297,pad=8,scale=Math.min((pw-2*pad)/im.width,(ph-2*pad)/im.height),w=im.width*scale,h=im.height*scale;
+  doc.addImage(pages[idx],'JPEG',(pw-w)/2,(ph-h)/2,w,h,undefined,'FAST');
+ }
+ return doc.output('blob');
+}
+async function savePdf(){try{const blob=await buildPdfBlob();downloadBlob(blob,'Q-Smart-Scanner.pdf');$('saveStatus').textContent='ดาวน์โหลด PDF รวม '+pages.length+' หน้าแล้ว'}catch(e){alert(e.message||'สร้าง PDF ไม่สำเร็จ')}}
+async function sharePdf(){
+ const btn=$('sharePDF');btn.disabled=true;
+ try{
+  const file=new File([await buildPdfBlob()],'Q-Smart-Scanner.pdf',{type:'application/pdf'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+   await navigator.share({files:[file],title:'Q Smart Scanner PDF'});
+   $('saveStatus').textContent='เปิดเมนูแชร์ PDF แล้ว เลือก LINE, AirDrop หรือ “บันทึกไปยังไฟล์” ได้';
+  }else{
+   downloadBlob(file,file.name);
+   $('saveStatus').textContent='ดาวน์โหลด PDF แล้ว เปิดไฟล์เพื่อแชร์หรือบันทึกลงแอปไฟล์';
+  }
+ }catch(e){if(e.name!=='AbortError')alert(e.message||'แชร์ PDF ไม่สำเร็จ')}
+ finally{btn.disabled=false}
+}
 
 async function shareJpg(){
  if(!pages.length){alert('กรุณาสแกนเอกสารก่อน');return}
@@ -186,6 +212,7 @@ async function shareAllPhotos(){
   }
  }finally{btn.disabled=false}
 }
+$('sharePDF').onclick=sharePdf;
 $('sharePhoto').onclick=shareJpg;
 $('shareAllPhotos').onclick=shareAllPhotos;
 
