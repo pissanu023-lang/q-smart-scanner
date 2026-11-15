@@ -14,6 +14,8 @@
 .live-status.found{background:#e1f9e9;color:#08723c}
 .cam-controls{display:flex;gap:9px;align-items:center;justify-content:center;margin-top:12px}
 .cam-controls .shutter{min-width:95px;min-height:65px;border-radius:50px;font-size:20px}
+.camera-box{isolation:isolate}.camera-box:after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,#53efac,transparent);opacity:.75;box-shadow:0 0 18px #53efac80;animation:scanbeam 3s ease-in-out infinite;pointer-events:none}@keyframes scanbeam{0%,100%{top:12%;opacity:.2}50%{top:88%;opacity:.75}}
+@media(prefers-reduced-motion:reduce){.camera-box:after{animation:none;display:none}}
 </style>
 </head>
 <body><div class="app"><header class="top"><div class="brand"><span class="brand-icon">▣</span><span>Q Smart<br>Scanner</span></div><p class="sub">สแกนเอกสารง่าย ๆ • ปรับมุมกระดาษ • บันทึก PDF</p></header>
@@ -29,7 +31,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script>
 'use strict';
-const $=id=>document.getElementById(id),pages=[],MAX_SIZE=1800;let source=null,points=null,cropped=null,processed=null,selected=0,mode='color',drag=-1,cvReady=false;let liveStream=null,liveTimer=null,liveQuad=null,liveRunning=false;
+const $=id=>document.getElementById(id),pages=[],MAX_SIZE=1800;let source=null,points=null,cropped=null,processed=null,selected=0,mode='color',drag=-1,cvReady=false;let liveStream=null,liveTimer=null,liveQuad=null,liveRunning=false,liveRaf=null,liveMisses=0,liveFrameCanvas=null,liveFrameCtx=null,liveLastScan=0,liveScanBusy=false,liveEpoch=0;
 function cvScriptLoaded(){const check=()=>{if(window.cv&&typeof cv.Mat==='function'){cvReady=true;return;}if(window.cv&&typeof cv.then==='function'){cv.then(x=>{window.cv=x;cvReady=true}).catch(()=>{});return;}setTimeout(check,400)};check()}
 function cvLoadFailed(){cvReady=false}
 function show(view){['home','camera','editor','result'].forEach(id=>$(id).classList.toggle('hide',id!==view));$('pages').classList.toggle('hide',view!=='pages');window.scrollTo({top:0,behavior:'smooth'})}
@@ -43,42 +45,97 @@ function detectCorners(){if(!source)return;if(!cvReady){status('ตัวตร�
 if(best){points=best;drawOverlay();status('✓ พบขอบกระดาษแล้ว หากยังไม่ตรงสามารถลากจุดสีเขียวได้')}else status('ยังไม่พบขอบกระดาษชัดเจน กรุณาลากจุดสีเขียวให้ตรงกับมุมกระดาษ')}
 catch(e){status('ไม่สามารถตรวจจับขอบอัตโนมัติได้ กรุณาปรับมุมด้วยนิ้ว')}finally{[src,gray,blur,edges,contours,hierarchy,kernel].forEach(m=>{if(m)try{m.delete()}catch(e){}})}}
 
-function stopLive(){liveRunning=false;if(liveTimer){clearTimeout(liveTimer);liveTimer=null;}if(liveStream){liveStream.getTracks().forEach(t=>t.stop());liveStream=null;}$('liveVideo').srcObject=null;liveQuad=null}
+function stopLive(){
+ liveRunning=false;liveEpoch++;
+ if(liveTimer){clearTimeout(liveTimer);liveTimer=null}
+ if(liveRaf){cancelAnimationFrame(liveRaf);liveRaf=null}
+ if(liveStream){liveStream.getTracks().forEach(t=>t.stop());liveStream=null}
+ $('liveVideo').srcObject=null;liveQuad=null;liveMisses=0;liveFrameCanvas=null;liveFrameCtx=null;liveScanBusy=false;
+}
 async function openLive(){
- if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('cameraInput').click();return;}
- show('camera');$('liveStatus').textContent='กำลังขออนุญาตเปิดกล้อง…';$('liveStatus').classList.remove('found');
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('cameraInput').click();return}
+ stopLive();show('camera');$('liveStatus').textContent='กำลังขออนุญาตเปิดกล้อง…';$('liveStatus').classList.remove('found');
  try{
-  liveStream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:1920}}});
-  const v=$('liveVideo');v.srcObject=liveStream;await v.play();liveRunning=true;liveQuad=null;liveScan();
- }catch(err){stopLive();alert('เปิดกล้องสดไม่ได้ กรุณาอนุญาตสิทธิ์กล้อง หรือใช้กล้องถ่ายภาพแบบเดิม');show('home');$('cameraInput').click();}
+  const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:1920}}});
+  liveStream=stream;const v=$('liveVideo');v.srcObject=stream;await v.play();liveRunning=true;liveQuad=null;liveLastScan=0;liveMisses=0;
+  liveFrameCanvas=document.createElement('canvas');liveFrameCtx=liveFrameCanvas.getContext('2d',{willReadFrequently:true});
+  liveScan();
+ }catch(err){stopLive();alert('เปิดกล้องสดไม่ได้ กรุณาอนุญาตสิทธิ์กล้อง หรือใช้กล้องถ่ายภาพแบบเดิม');show('home');$('cameraInput').click()}
 }
 function findLiveQuad(c){
  if(!cvReady)return null;
- let src,gray,blur,edge,contours,hierarchy;
+ let src,gray,blur,edge,contours,hierarchy,kernel;
  try{
- src=cv.imread(c);gray=new cv.Mat();blur=new cv.Mat();edge=new cv.Mat();contours=new cv.MatVector();hierarchy=new cv.Mat();
- cv.cvtColor(src,gray,cv.COLOR_RGBA2GRAY);cv.GaussianBlur(gray,blur,new cv.Size(5,5),0);cv.Canny(blur,edge,55,150);
- cv.findContours(edge,contours,hierarchy,cv.RETR_LIST,cv.CHAIN_APPROX_SIMPLE);
- let best=null,bestArea=0;const minArea=c.width*c.height*.12;
- for(let i=0;i<contours.size();i++){let ct=contours.get(i),ap=new cv.Mat();try{cv.approxPolyDP(ct,ap,cv.arcLength(ct,true)*.025,true);const area=Math.abs(cv.contourArea(ap));if(ap.rows===4&&area>minArea&&area>bestArea&&cv.isContourConvex(ap)){let arr=[];for(let j=0;j<4;j++)arr.push([ap.data32S[2*j],ap.data32S[2*j+1]]);best=orderPoints(arr);bestArea=area}}finally{ap.delete();ct.delete()}}
- return best;
- }catch(e){return null}finally{[src,gray,blur,edge,contours,hierarchy].forEach(m=>{if(m)try{m.delete()}catch(e){}})}
+  src=cv.imread(c);gray=new cv.Mat();blur=new cv.Mat();edge=new cv.Mat();contours=new cv.MatVector();hierarchy=new cv.Mat();
+  cv.cvtColor(src,gray,cv.COLOR_RGBA2GRAY);
+  cv.GaussianBlur(gray,blur,new cv.Size(5,5),0);
+  cv.Canny(blur,edge,45,135);
+  kernel=cv.Mat.ones(3,3,cv.CV_8U);cv.morphologyEx(edge,edge,cv.MORPH_CLOSE,kernel);
+  cv.findContours(edge,contours,hierarchy,cv.RETR_LIST,cv.CHAIN_APPROX_SIMPLE);
+  let best=null,bestScore=0;const imageArea=c.width*c.height;
+  for(let i=0;i<contours.size();i++){
+   const ct=contours.get(i),ap=new cv.Mat();
+   try{
+    const perimeter=cv.arcLength(ct,true);
+    cv.approxPolyDP(ct,ap,perimeter*.024,true);
+    const area=Math.abs(cv.contourArea(ap));
+    if(ap.rows!==4||area<imageArea*.075||!cv.isContourConvex(ap))continue;
+    const arr=[];for(let j=0;j<4;j++)arr.push([ap.data32S[2*j],ap.data32S[2*j+1]]);
+    const q=orderPoints(arr);
+    if(new Set(q.map(v=>v.join(','))).size!==4)continue;
+    const score=area/imageArea + (area>imageArea*.92?-.4:0);
+    if(score>bestScore){best=q;bestScore=score}
+   }finally{ap.delete();ct.delete()}
+  }
+  return best;
+ }catch(e){return null}finally{[src,gray,blur,edge,contours,hierarchy,kernel].forEach(m=>{if(m)try{m.delete()}catch(e){}})}
 }
 function paintLive(){
+ if(!liveRunning)return;
  const v=$('liveVideo'),overlay=$('liveOverlay');if(!v.videoWidth||!v.videoHeight)return;
- overlay.width=v.videoWidth;overlay.height=v.videoHeight;
+ if(overlay.width!==v.videoWidth||overlay.height!==v.videoHeight){overlay.width=v.videoWidth;overlay.height=v.videoHeight}
  const g=overlay.getContext('2d'),w=overlay.width,h=overlay.height;
+ g.clearRect(0,0,w,h);
  const p=liveQuad||[[w*.09,h*.09],[w*.91,h*.09],[w*.91,h*.91],[w*.09,h*.91]];
- g.strokeStyle=liveQuad?'#22ef67':'#ffce21';g.lineWidth=Math.max(5,w/165);g.lineJoin='round';g.shadowColor='#0009';g.shadowBlur=8;
+ const found=!!liveQuad;
+ g.strokeStyle=found?'#28f76d':'#ffd338';g.lineWidth=Math.max(5,w/175);g.lineJoin='round';g.shadowColor=found?'#00ff7499':'#ffa80077';g.shadowBlur=14;
  g.beginPath();p.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.closePath();g.stroke();g.shadowBlur=0;
- for(const q of p){g.beginPath();g.arc(q[0],q[1],Math.max(8,w/90),0,Math.PI*2);g.fillStyle='#fff';g.fill();g.stroke()}
- const st=$('liveStatus');st.classList.toggle('found',!!liveQuad);
- st.textContent=liveQuad?'✓ ตรวจพบขอบเอกสารแล้ว — กดถ่ายได้เลย':cvReady?'กำลังหาขอบกระดาษ — ขยับกล้องให้เห็นกระดาษทั้งใบ':'กรอบช่วยเล็ง (ยังไม่ตรวจจับอัตโนมัติ) — กดถ่ายแล้วปรับมุมได้';
+ for(const q of p){g.beginPath();g.arc(q[0],q[1],Math.max(7,w/100),0,Math.PI*2);g.fillStyle='#ffffff';g.fill();g.stroke()}
+ const st=$('liveStatus');st.classList.toggle('found',found);
+ const text=found?'✓ จับขอบกระดาษสดแล้ว — กดถ่ายได้เลย':cvReady?'กำลังติดตามขอบกระดาษแบบสด — เล็งให้เห็นเอกสารทั้งใบ':'กรอบช่วยเล็ง — กำลังโหลดระบบจับขอบสด';
+ if(st.textContent!==text)st.textContent=text;
 }
-function liveScan(){if(!liveRunning)return;const v=$('liveVideo');if(v.readyState>=2&&v.videoWidth){
- if(cvReady){const c=document.createElement('canvas');const k=Math.min(1,560/v.videoWidth);c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);c.getContext('2d').drawImage(v,0,0,c.width,c.height);const q=findLiveQuad(c);liveQuad=q?q.map(p=>[p[0]/k,p[1]/k]):null;}else liveQuad=null;
+function liveScan(timestamp){
+ if(!liveRunning)return;
+ // วาดกรอบทุกเฟรมเพื่อให้แสดงภาพลื่น ส่วนการตรวจขอบทำที่ความละเอียดต่ำกว่าเพื่อรักษาแบตเตอรี่
  paintLive();
- }liveTimer=setTimeout(liveScan,850)}
+ if(!liveScanBusy && timestamp-liveLastScan>=260){
+  liveLastScan=timestamp;liveScanBusy=true;
+  const epoch=liveEpoch;
+  try{
+   const v=$('liveVideo');
+   if(cvReady&&v.readyState>=2&&v.videoWidth&&liveFrameCtx){
+    const scale=Math.min(1,480/Math.max(v.videoWidth,v.videoHeight));
+    const c=liveFrameCanvas;c.width=Math.max(2,Math.round(v.videoWidth*scale));c.height=Math.max(2,Math.round(v.videoHeight*scale));
+    liveFrameCtx.drawImage(v,0,0,c.width,c.height);
+    const quad=findLiveQuad(c);
+    if(epoch===liveEpoch){
+     if(quad){
+      const target=quad.map(q=>[q[0]/scale,q[1]/scale]);
+      // Smooth tracking: ลดอาการกรอบกระตุก แต่ยังเคลื่อนตามกระดาษต่อเนื่อง
+      if(liveQuad){
+       const delta=target.reduce((acc,q,i)=>acc+Math.hypot(q[0]-liveQuad[i][0],q[1]-liveQuad[i][1]),0)/4;
+       const alpha=delta>Math.max(v.videoWidth,v.videoHeight)*.14?.75:.43;
+       liveQuad=target.map((q,i)=>[liveQuad[i][0]*(1-alpha)+q[0]*alpha,liveQuad[i][1]*(1-alpha)+q[1]*alpha]);
+      }else liveQuad=target;
+      liveMisses=0;
+     }else if(++liveMisses>=4)liveQuad=null; // อย่าให้กรอบกระพริบทันทีเมื่อมือสั่น
+    }
+   }
+  }catch(e){}finally{liveScanBusy=false}
+ }
+ liveRaf=requestAnimationFrame(liveScan);
+}
 $('closeCamera').onclick=()=>{stopLive();show(pages.length?'pages':'home')};
 $('takePhoto').onclick=()=>{const v=$('liveVideo');if(!v.videoWidth){alert('กล้องยังไม่พร้อม');return}const scale=Math.min(1,MAX_SIZE/Math.max(v.videoWidth,v.videoHeight));const c=document.createElement('canvas');c.width=Math.round(v.videoWidth*scale);c.height=Math.round(v.videoHeight*scale);c.getContext('2d').drawImage(v,0,0,c.width,c.height);const p=liveQuad?liveQuad.map(q=>q.map(n=>n*scale)):null;stopLive();startFromCanvas(c,p)};
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&liveRunning){stopLive();if(!$('camera').classList.contains('hide'))show('home')}});
