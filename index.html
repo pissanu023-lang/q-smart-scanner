@@ -22,7 +22,7 @@
 <section id="camera" class="hide"><div class="panel" style="margin-top:0"><h2>📷 สแกนเอกสารแบบสด</h2><div class="camera-box" id="cameraBox"><video id="liveVideo" autoplay playsinline muted></video><canvas id="liveOverlay"></canvas></div><div class="live-status" id="liveStatus">กำลังเปิดกล้อง…</div><div class="cam-controls"><button class="secondary" id="closeCamera">ยกเลิก</button><button class="primary shutter" id="takePhoto">📸 ถ่าย</button></div><p class="hint">กรอบเหลือง = กำลังหาเอกสาร • กรอบเขียว = ตรวจพบขอบแล้ว หลังถ่ายยังลากแก้มุมได้</p></div></section>
 <section id="editor" class="hide"><div class="panel" style="margin-top:0"><h2>ปรับมุมเอกสาร <span class="muted" id="pageLabel"></span></h2><div class="preview-wrap" id="previewWrap"><canvas id="preview"></canvas></div><p class="hint">ลากวงกลมสีเขียว 4 มุมให้ตรงขอบกระดาษ แล้วกด “ตัดและปรับให้ตรง”</p><div class="actions"><button class="secondary" id="autoBtn">✨ จับขอบอัตโนมัติ</button><button class="primary" id="cropBtn">✓ ตัดและปรับให้ตรง</button></div><div class="status" id="detectStatus"></div></div></section>
 <section id="result" class="hide"><div class="panel" style="margin-top:0"><h2>ตัวอย่างเอกสารที่สแกน</h2><div class="preview-wrap" style="background:#dde8f8;touch-action:auto"><canvas id="resultCanvas"></canvas></div><div class="modes" id="modes"><button class="mode active" data-mode="color">สี</button><button class="mode" data-mode="gray">ขาวดำ</button><button class="mode" data-mode="document">เอกสารคมชัด</button></div><div class="actions"><button class="secondary" id="editCorners">↶ ปรับมุมใหม่</button><button class="primary" id="keepPage">✓ เก็บหน้านี้</button></div></div></section>
-<section id="pages" class="panel hide"><h2>เอกสารของฉัน <span class="muted" id="count">0 หน้า</span></h2><div class="thumbs" id="thumbs"></div><p class="hint">แตะรูปเล็กเพื่อดูหน้า • PDF จะเรียงหน้าตามลำดับที่สแกน</p><div class="actions"><button class="secondary" id="addPage">＋ เพิ่มหน้า</button><button class="primary" id="savePDF">📕 บันทึก PDF</button><button class="primary" id="saveJPG">🖼️ บันทึก JPG</button><button class="secondary" id="sharePhoto">📲 แชร์ / เก็บในรูปภาพ</button></div><div class="actions" style="margin-top:8px"><button class="danger" id="deletePage">ลบหน้าที่เลือก</button><button class="secondary" id="newScan">กลับหน้าแรก</button></div><div class="status" id="saveStatus"></div></section>
+<section id="pages" class="panel hide"><h2>เอกสารของฉัน <span class="muted" id="count">0 หน้า</span></h2><div class="thumbs" id="thumbs"></div><p class="hint">แตะรูปเล็กเพื่อดูหน้า • PDF จะเรียงหน้าตามลำดับที่สแกน</p><div class="actions"><button class="secondary" id="addPage">＋ เพิ่มหน้า</button><button class="primary" id="savePDF">📕 บันทึก PDF</button><button class="primary" id="saveJPG">🖼️ บันทึก JPG</button><button class="secondary" id="sharePhoto">📲 แชร์รูปที่เลือก</button><button class="primary" id="shareAllPhotos">📲 แชร์รูปทั้งหมดเข้าอัลบั้ม</button></div><div class="actions" style="margin-top:8px"><button class="danger" id="deletePage">ลบหน้าที่เลือก</button><button class="secondary" id="newScan">กลับหน้าแรก</button></div><div class="status" id="saveStatus"></div></section>
 <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hide"><input id="galleryInput" type="file" accept="image/*" multiple class="hide">
 <footer class="footer">Q Smart Scanner • เอกสารประมวลผลในเครื่องของคุณ<br>ฟังก์ชันตรวจขอบอัตโนมัติต้องใช้อินเทอร์เน็ตเพื่อโหลดตัวประมวลผลครั้งแรก</footer></main></div>
 <script src="https://docs.opencv.org/4.x/opencv.js" async onload="cvScriptLoaded()" onerror="cvLoadFailed()"></script>
@@ -95,7 +95,7 @@ function renderMode(){if(!cropped)return;const c=$('resultCanvas');c.width=cropp
 $('cropBtn').onclick=()=>{try{cropped=warpPerspective();mode='color';renderMode();show('result')}catch(e){alert('ปรับมุมไม่สำเร็จ กรุณาลองใหม่')}};
 $('autoBtn').onclick=detectCorners;$('editCorners').onclick=()=>show('editor');document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;renderMode()});
 $('keepPage').onclick=()=>{if(!processed)return;pages.push(processed.toDataURL('image/jpeg',.92));selected=pages.length-1;source=null;renderPages();show('pages')};
-function renderPages(){$('count').textContent=pages.length+' หน้า';const root=$('thumbs');root.innerHTML='';pages.forEach((url,i)=>{const btn=document.createElement('button');btn.className='thumb'+(selected===i?' active':'');const im=document.createElement('img');im.src=url;im.alt='หน้าที่ '+(i+1);const tag=document.createElement('span');tag.textContent=i+1;btn.append(im,tag);btn.onclick=()=>{selected=i;renderPages()};root.append(btn)});$('saveStatus').textContent=pages.length?'เลือกหน้าที่ต้องการบันทึกเป็น JPG หรือบันทึกทุกหน้าเป็น PDF':'ยังไม่มีเอกสาร'}
+function renderPages(){$('count').textContent=pages.length+' หน้า';const root=$('thumbs');root.innerHTML='';pages.forEach((url,i)=>{const btn=document.createElement('button');btn.className='thumb'+(selected===i?' active':'');const im=document.createElement('img');im.src=url;im.alt='หน้าที่ '+(i+1);const tag=document.createElement('span');tag.textContent=i+1;btn.append(im,tag);btn.onclick=()=>{selected=i;renderPages()};root.append(btn)});$('saveStatus').textContent=pages.length?'สแกนแล้ว ' + pages.length + ' รูป • แตะ “แชร์รูปทั้งหมดเข้าอัลบั้ม” เพื่อส่งรูปหลายใบพร้อมกัน หรือเลือกบันทึก PDF':'ยังไม่มีเอกสาร'}
 $('deletePage').onclick=()=>{if(!pages.length)return;if(!confirm('ลบหน้าที่ '+(selected+1)+' ออกจากชุดเอกสารนี้?'))return;pages.splice(selected,1);selected=Math.max(0,Math.min(selected,pages.length-1));renderPages();if(!pages.length)show('home')};
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)}
 function dataBlob(data){const [info,b64]=data.split(','),bin=atob(b64),out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return new Blob([out],{type:'image/jpeg'})}
@@ -109,7 +109,28 @@ async function shareJpg(){
  catch(e){if(e.name==='AbortError')return}
  downloadBlob(file,file.name);$('saveStatus').textContent='ดาวน์โหลดภาพแล้ว เปิดภาพแล้วเลือก แชร์ → บันทึกรูปภาพ หากต้องการเพิ่มเข้าอัลบั้ม';
 }
+async function shareAllPhotos(){
+ if(!pages.length){alert('กรุณาสแกนเอกสารก่อน');return}
+ const btn=$('shareAllPhotos');btn.disabled=true;
+ try{
+  // แต่ละหน้าจะเป็นไฟล์ JPG แยกกัน ไม่รวมเป็นภาพเดียว
+  const files=pages.map((data,i)=>new File([dataBlob(data)],`Q-Scan-page-${String(i+1).padStart(2,'0')}.jpg`,{type:'image/jpeg'}));
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files})){
+   await navigator.share({files,title:'Q Smart Scanner - '+files.length+' รูป'});
+   $('saveStatus').textContent='เปิดเมนูแชร์ '+files.length+' รูปแล้ว หากต้องการเก็บในแอปรูปภาพให้เลือก “บันทึก '+files.length+' รูปภาพ” (ชื่อเมนูอาจต่างกัน)';
+  }else{
+   $('saveStatus').textContent='เบราว์เซอร์นี้ไม่รองรับแชร์หลายไฟล์พร้อมกัน ลองเปิดผ่าน Safari บน iPhone หรือใช้ปุ่มบันทึก PDF';
+   alert('อุปกรณ์หรือเบราว์เซอร์นี้ไม่รองรับการแชร์หลายรูปพร้อมกัน กรุณาเปิดผ่าน Safari บน iPhone หรือเลือกบันทึก PDF');
+  }
+ }catch(e){
+  if(e.name!=='AbortError'){
+   $('saveStatus').textContent='ไม่สามารถแชร์รูปทั้งหมดได้ อาจมีรูปมากเกินไปหรือหน่วยความจำไม่พอ ลองแชร์ทีละรูปหรือบันทึกเป็น PDF';
+   alert('แชร์หลายรูปไม่สำเร็จ ลองลดจำนวนรูปแล้วแชร์ใหม่ หรือเลือกบันทึก PDF');
+  }
+ }finally{btn.disabled=false}
+}
 $('sharePhoto').onclick=shareJpg;
+$('shareAllPhotos').onclick=shareAllPhotos;
 
 $('savePDF').onclick=savePdf;$('saveJPG').onclick=saveJpg;$('cameraBtn').onclick=openLive;$('galleryBtn').onclick=()=>$('galleryInput').click();$('addPage').onclick=openLive;$('moreHome').onclick=openLive;$('pdfHome').onclick=()=>{if(!pages.length)alert('เริ่มจากถ่ายภาพเอกสารก่อน แล้วเลือกบันทึกเป็น PDF');else savePdf()};$('imageHome').onclick=()=>{if(!pages.length)alert('เริ่มจากถ่ายภาพเอกสารก่อน แล้วเลือกบันทึกเป็น JPG');else saveJpg()};$('filesHome').onclick=()=>{if(!pages.length)alert('ยังไม่มีภาพที่สแกนในครั้งนี้');else{renderPages();show('pages')}};$('newScan').onclick=()=>show('home');
 $('cameraInput').onchange=async e=>{const file=e.target.files[0];e.target.value='';await startFile(file)};
