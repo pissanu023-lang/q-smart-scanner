@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="th">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0868db">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0868db"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Q Smart Scanner</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
@@ -16,15 +16,46 @@
 .cam-controls .shutter{min-width:95px;min-height:65px;border-radius:50px;font-size:20px}
 .camera-box{isolation:isolate}.camera-box:after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,#53efac,transparent);opacity:.75;box-shadow:0 0 18px #53efac80;animation:scanbeam 3s ease-in-out infinite;pointer-events:none}@keyframes scanbeam{0%,100%{top:12%;opacity:.2}50%{top:88%;opacity:.75}}
 @media(prefers-reduced-motion:reduce){.camera-box:after{animation:none;display:none}}
+
+/* Portrait camera redesign: comfortable one-hand iPhone scanning layout */
+.top{padding:18px 20px 19px;border-radius:0 0 25px 25px}.brand{font-size:23px}.brand-icon{font-size:30px}.main{padding:12px 14px 22px}
+.camera-screen{background:linear-gradient(#f2f8ff,#ecf5ff);border-radius:24px;padding:10px 0 6px}
+.camera-heading{display:flex;gap:12px;align-items:center;padding:5px 4px 13px}
+.camera-heading>div{display:flex;flex:1;flex-direction:column;gap:2px}.camera-heading strong{font-size:19px;color:#11366d}.camera-heading small{font-size:11px;color:#7992b1}
+.back-btn{height:39px;width:39px;border-radius:14px;background:#fff;color:#0867d5;font-size:35px;line-height:30px;box-shadow:0 2px 9px #143c7a14}
+.live-chip{font-size:11px;color:#178349;background:#e4f9ec;padding:8px;border-radius:99px;font-weight:800}
+.camera-box{width:100%;aspect-ratio:3/4;min-height:0;max-height:min(62dvh,640px);border:5px solid white;border-radius:22px;box-shadow:0 5px 17px #164b8c2c}
+.camera-box video{width:100%;height:100%;max-height:none;object-fit:contain}
+.camera-box canvas{width:100%;height:100%;z-index:1}
+.live-topbar{position:absolute;inset:13px 12px auto;z-index:2;display:flex;justify-content:space-between;color:#fff;font-size:12px;line-height:1.4;pointer-events:none}
+.live-topbar span{background:#0d233c9c;border-radius:99px;padding:6px 10px}
+.camera-bottom-status{position:absolute;z-index:2;bottom:13px;left:12px;right:12px;line-height:1.4;text-align:center;background:#13263cbd;color:white;font-size:12px;border-radius:25px;padding:10px 8px;pointer-events:none}
+.camera-bottom-status.found{background:#063e2dc9}
+.mode-row{display:flex;gap:6px;overflow:auto;white-space:nowrap;padding:12px 1px 3px;scrollbar-width:none}.mode-row::-webkit-scrollbar{display:none}
+.cam-mode{flex:1;background:white;border:1px solid #dfeaf8;border-radius:13px;color:#496785;font-size:12px;font-weight:700;padding:10px 6px;white-space:nowrap}
+.cam-mode.active{color:white;background:#0877ed;border-color:#0877ed}
+.capture-row{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:10px;align-items:center;background:white;border-radius:22px;padding:10px 12px;margin-top:9px;box-shadow:0 4px 18px #144d9b10}
+.capture-side{background:transparent;display:flex;align-items:center;flex-direction:column;gap:3px;color:#1e4169;font-size:12px;min-height:65px;justify-content:center}
+.capture-icon{font-size:29px;line-height:1}
+.capture-shutter{width:79px;height:79px;border-radius:50%;background:linear-gradient(150deg,#168ffe,#0349ce);color:white;margin:auto;border:5px solid white;outline:4px solid #9ecaff;box-shadow:0 5px 10px #1c7de72b;font-size:29px;display:grid;place-items:center}
+.capture-shutter:active{transform:scale(.96)}.camera-help{text-align:center;color:#6c82a0;font-size:11px;line-height:1.7;margin:10px 2px}
+#pages .actions button{min-width:45%;font-size:13px}
+@media(max-width:370px){.camera-box{max-height:54dvh}.cam-mode{font-size:11px;padding:9px 4px}.capture-shutter{width:70px;height:70px}}
 </style>
 </head>
 <body><div class="app"><header class="top"><div class="brand"><span class="brand-icon">▣</span><span>Q Smart<br>Scanner</span></div><p class="sub">สแกนเอกสารง่าย ๆ • ปรับมุมกระดาษ • บันทึก PDF</p></header>
 <main class="main">
 <section id="home"><div class="grid"><button class="tile" id="cameraBtn"><span class="emoji">📷</span><b>สแกนเอกสาร</b><small>ถ่ายด้วยกล้อง</small></button><button class="tile" id="galleryBtn"><span class="emoji">🏞️</span><b>เลือกรูปจากเครื่อง</b><small>นำรูปมาแปลง</small></button><button class="tile" id="pdfHome"><span class="emoji">📕</span><b>บันทึกเป็น PDF</b><small>รวมเอกสารหลายหน้า</small></button><button class="tile" id="imageHome"><span class="emoji">🖼️</span><b>บันทึกเป็นรูปภาพ</b><small>JPG คุณภาพสูง</small></button><button class="tile" id="moreHome"><span class="emoji">📑</span><b>สแกนหลายหน้า</b><small>ถ่ายเพิ่มต่อเนื่อง</small></button><button class="tile" id="filesHome"><span class="emoji">📂</span><b>ไฟล์ของฉัน</b><small>ดูภาพที่สแกนในครั้งนี้</small></button></div><div class="panel"><span class="badge">✓ ใช้งานบน iPhone ได้</span><p class="hint" style="margin-bottom:0">✓ ตรวจหาขอบกระดาษอัตโนมัติ<br>✓ ดึงมุมเอกสารให้ตรงเหมือนถ่ายจากด้านบน<br>✓ ปรับมุมเองด้วยการลากจุดสีเขียว<br>✓ รวมหลายหน้าเป็น PDF ไฟล์เดียว</p></div></section>
-<section id="camera" class="hide"><div class="panel" style="margin-top:0"><h2>📷 สแกนเอกสารแบบสด</h2><div class="camera-box" id="cameraBox"><video id="liveVideo" autoplay playsinline muted></video><canvas id="liveOverlay"></canvas></div><div class="live-status" id="liveStatus">กำลังเปิดกล้อง…</div><div class="cam-controls"><button class="secondary" id="closeCamera">ยกเลิก</button><button class="primary shutter" id="takePhoto">📸 ถ่าย</button></div><p class="hint">กรอบเหลือง = กำลังหาเอกสาร • กรอบเขียว = ตรวจพบขอบแล้ว หลังถ่ายยังลากแก้มุมได้</p></div></section>
+<section id="camera" class="hide camera-screen">
+<div class="camera-heading"><button class="back-btn" id="closeCamera" aria-label="ย้อนกลับ">‹</button><div><strong>สแกนเอกสาร</strong><small>Q Smart Scanner • กล้องแนวตั้ง</small></div><span class="live-chip" id="liveChip">● LIVE</span></div>
+<div class="camera-box" id="cameraBox"><video id="liveVideo" autoplay playsinline muted></video><canvas id="liveOverlay"></canvas><div class="live-topbar"><span>⚡ อัตโนมัติ</span><span id="cameraCount">0 หน้า</span></div><div class="camera-bottom-status" id="liveStatus">กำลังเปิดกล้อง…</div></div>
+<div class="mode-row"><button class="cam-mode active" data-kind="document">▤ เอกสาร</button><button class="cam-mode" data-kind="card">▣ บัตร</button><button class="cam-mode" data-kind="multi">▤ หลายหน้า</button><button class="cam-mode" data-kind="photo">▧ รูปภาพ</button></div>
+<div class="capture-row"><button class="capture-side" id="cameraPages" aria-label="ดูหน้าที่สแกน"><span class="capture-icon">▤</span><b id="cameraPageCount">0 หน้า</b></button><button class="capture-shutter" id="takePhoto" aria-label="ถ่ายเอกสาร"><span>📷</span></button><button class="capture-side" id="cameraGallery" aria-label="เลือกรูปจากเครื่อง"><span class="capture-icon">▧</span><b>เลือกรูป</b></button></div>
+<p class="camera-help">กรอบ <b style="color:#e1a000">สีเหลือง</b> กำลังค้นหา • กรอบ <b style="color:#0caa55">สีเขียว</b> พบขอบเอกสาร<br>หลังถ่ายสามารถลากแก้ทั้ง 4 มุมได้</p>
+</section>
 <section id="editor" class="hide"><div class="panel" style="margin-top:0"><h2>ปรับมุมเอกสาร <span class="muted" id="pageLabel"></span></h2><div class="preview-wrap" id="previewWrap"><canvas id="preview"></canvas></div><p class="hint">ลากวงกลมสีเขียว 4 มุมให้ตรงขอบกระดาษ แล้วกด “ตัดและปรับให้ตรง”</p><div class="actions"><button class="secondary" id="autoBtn">✨ จับขอบอัตโนมัติ</button><button class="primary" id="cropBtn">✓ ตัดและปรับให้ตรง</button></div><div class="status" id="detectStatus"></div></div></section>
 <section id="result" class="hide"><div class="panel" style="margin-top:0"><h2>ตัวอย่างเอกสารที่สแกน</h2><div class="preview-wrap" style="background:#dde8f8;touch-action:auto"><canvas id="resultCanvas"></canvas></div><div class="modes" id="modes"><button class="mode active" data-mode="color">สี</button><button class="mode" data-mode="gray">ขาวดำ</button><button class="mode" data-mode="document">เอกสารคมชัด</button></div><div class="actions"><button class="secondary" id="editCorners">↶ ปรับมุมใหม่</button><button class="primary" id="keepPage">✓ เก็บหน้านี้</button></div></div></section>
-<section id="pages" class="panel hide"><h2>เอกสารของฉัน <span class="muted" id="count">0 หน้า</span></h2><div class="thumbs" id="thumbs"></div><p class="hint">แตะรูปเล็กเพื่อดูหน้า • PDF จะเรียงหน้าตามลำดับที่สแกน</p><div class="actions"><button class="secondary" id="addPage">＋ เพิ่มหน้า</button><button class="primary" id="savePDF">📕 บันทึก PDF</button><button class="secondary" id="sharePDF">📤 แชร์ไฟล์ PDF</button><button class="primary" id="saveJPG">🖼️ บันทึก JPG</button><button class="secondary" id="sharePhoto">📲 แชร์รูปที่เลือก</button><button class="primary" id="shareAllPhotos">📲 แชร์รูปทั้งหมดเข้าอัลบั้ม</button></div><div class="actions" style="margin-top:8px"><button class="danger" id="deletePage">ลบหน้าที่เลือก</button><button class="secondary" id="newScan">กลับหน้าแรก</button></div><div class="status" id="saveStatus"></div></section>
+<section id="pages" class="panel hide"><h2>📑 เอกสารของฉัน <span class="muted" id="count">0 หน้า</span></h2><div class="thumbs" id="thumbs"></div><p class="hint">แตะรูปเล็กเพื่อดูหน้า • PDF จะเรียงหน้าตามลำดับที่สแกน</p><div class="actions"><button class="secondary" id="addPage">＋ เพิ่มหน้า</button><button class="primary" id="savePDF">📕 บันทึก PDF</button><button class="secondary" id="sharePDF">📤 แชร์ไฟล์ PDF</button><button class="secondary" id="saveJPG">🖼️ ดาวน์โหลด JPG</button><button class="secondary" id="sharePhoto">📲 แชร์รูปที่เลือก</button><button class="primary" id="shareAllPhotos">🌈 แชร์หลายรูปเข้าแกลเลอรี</button></div><div class="actions" style="margin-top:8px"><button class="danger" id="deletePage">ลบหน้าที่เลือก</button><button class="secondary" id="newScan">กลับหน้าแรก</button></div><div class="status" id="saveStatus"></div></section>
 <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hide"><input id="galleryInput" type="file" accept="image/*" multiple class="hide">
 <footer class="footer">Q Smart Scanner • เอกสารประมวลผลในเครื่องของคุณ<br>ฟังก์ชันตรวจขอบอัตโนมัติต้องใช้อินเทอร์เน็ตเพื่อโหลดตัวประมวลผลครั้งแรก</footer></main></div>
 <script src="https://docs.opencv.org/4.x/opencv.js" async onload="cvScriptLoaded()" onerror="cvLoadFailed()"></script>
@@ -39,7 +70,7 @@ function status(msg){$('detectStatus').textContent=msg}
 function loadImage(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>{const scale=Math.min(1,MAX_SIZE/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*scale);c.height=Math.round(im.naturalHeight*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);resolve(c)};im.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('เปิดรูปภาพไม่ได้'))};im.src=url})}
 function startFromCanvas(canvas,foundPoints){source=canvas;points=foundPoints||initialPoints();cropped=null;drawOverlay();show('editor');status(foundPoints?'✓ พบขอบจากกล้องแล้ว ตรวจสอบและปรับมุมก่อนบันทึก':'กำลังตรวจขอบเอกสารอีกครั้ง…');setTimeout(detectCorners,80)}
 function initialPoints(){const w=source.width,h=source.height;return [[w*.07,h*.07],[w*.93,h*.07],[w*.93,h*.93],[w*.07,h*.93]]}
-async function startFile(file){if(!file)return;try{startFromCanvas(await loadImage(file),null)}catch(e){alert(e.message)}}
+async function startFile(file){if(!file)return;stopLive();try{startFromCanvas(await loadImage(file),null)}catch(e){alert(e.message)}}
 function drawOverlay(){if(!source)return;const c=$('preview'),ctx=c.getContext('2d');c.width=source.width;c.height=source.height;ctx.drawImage(source,0,0);ctx.strokeStyle='#27ec5e';ctx.lineWidth=Math.max(3,source.width/200);ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.stroke();points.forEach(p=>{ctx.beginPath();ctx.arc(...p,Math.max(10,source.width/55),0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.stroke()})}
 function detectCorners(){if(!source)return;if(!cvReady){status('ตัวตรวจจับอัตโนมัติยังไม่พร้อม คุณสามารถลากจุดสีเขียวเพื่อปรับมุมด้วยตัวเองได้');return}let src,gray,blur,edges,contours,hierarchy,kernel;try{src=cv.imread(source);gray=new cv.Mat();blur=new cv.Mat();edges=new cv.Mat();cv.cvtColor(src,gray,cv.COLOR_RGBA2GRAY);cv.GaussianBlur(gray,blur,new cv.Size(5,5),0);cv.Canny(blur,edges,60,170);kernel=cv.Mat.ones(3,3,cv.CV_8U);cv.dilate(edges,edges,kernel);contours=new cv.MatVector();hierarchy=new cv.Mat();cv.findContours(edges,contours,hierarchy,cv.RETR_LIST,cv.CHAIN_APPROX_SIMPLE);let best=null,bestArea=0;const minArea=source.width*source.height*.09;for(let i=0;i<contours.size();i++){const ct=contours.get(i);const perimeter=cv.arcLength(ct,true),approx=new cv.Mat();cv.approxPolyDP(ct,approx,perimeter*.025,true);const area=Math.abs(cv.contourArea(approx));if(approx.rows===4&&area>bestArea&&area>minArea&&cv.isContourConvex(approx)){const arr=[];for(let j=0;j<4;j++)arr.push([approx.data32S[2*j],approx.data32S[2*j+1]]);best=orderPoints(arr);bestArea=area}approx.delete();ct.delete()}
 if(best){points=best;drawOverlay();status('✓ พบขอบกระดาษแล้ว หากยังไม่ตรงสามารถลากจุดสีเขียวได้')}else status('ยังไม่พบขอบกระดาษชัดเจน กรุณาลากจุดสีเขียวให้ตรงกับมุมกระดาษ')}
@@ -54,7 +85,7 @@ function stopLive(){
 }
 async function openLive(){
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('cameraInput').click();return}
- stopLive();show('camera');$('liveStatus').textContent='กำลังขออนุญาตเปิดกล้อง…';$('liveStatus').classList.remove('found');
+ stopLive();show('camera');$('liveStatus').textContent='กำลังขออนุญาตเปิดกล้อง…';$('liveStatus').classList.remove('found');$('cameraPageCount').textContent=pages.length+' หน้า';$('cameraCount').textContent=pages.length+' หน้า';
  try{
   const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:1920}}});
   liveStream=stream;const v=$('liveVideo');v.srcObject=stream;await v.play();liveRunning=true;liveQuad=null;liveLastScan=0;liveMisses=0;
@@ -93,17 +124,21 @@ function findLiveQuad(c){
 function paintLive(){
  if(!liveRunning)return;
  const v=$('liveVideo'),overlay=$('liveOverlay');if(!v.videoWidth||!v.videoHeight)return;
- if(overlay.width!==v.videoWidth||overlay.height!==v.videoHeight){overlay.width=v.videoWidth;overlay.height=v.videoHeight}
- const g=overlay.getContext('2d'),w=overlay.width,h=overlay.height;
- g.clearRect(0,0,w,h);
- const p=liveQuad||[[w*.09,h*.09],[w*.91,h*.09],[w*.91,h*.91],[w*.09,h*.91]];
- const found=!!liveQuad;
- g.strokeStyle=found?'#28f76d':'#ffd338';g.lineWidth=Math.max(5,w/175);g.lineJoin='round';g.shadowColor=found?'#00ff7499':'#ffa80077';g.shadowBlur=14;
- g.beginPath();p.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.closePath();g.stroke();g.shadowBlur=0;
- for(const q of p){g.beginPath();g.arc(q[0],q[1],Math.max(7,w/100),0,Math.PI*2);g.fillStyle='#ffffff';g.fill();g.stroke()}
- const st=$('liveStatus');st.classList.toggle('found',found);
- const text=found?'✓ จับขอบกระดาษสดแล้ว — กดถ่ายได้เลย':cvReady?'กำลังติดตามขอบกระดาษแบบสด — เล็งให้เห็นเอกสารทั้งใบ':'กรอบช่วยเล็ง — กำลังโหลดระบบจับขอบสด';
- if(st.textContent!==text)st.textContent=text;
+ const cw=overlay.clientWidth,ch=overlay.clientHeight;if(!cw||!ch)return;
+ const density=Math.min(window.devicePixelRatio||1,2),pxW=Math.round(cw*density),pxH=Math.round(ch*density);
+ if(overlay.width!==pxW||overlay.height!==pxH){overlay.width=pxW;overlay.height=pxH}
+ const g=overlay.getContext('2d');g.setTransform(density,0,0,density,0,0);g.clearRect(0,0,cw,ch);
+ // object-fit:contain displays the live camera with letterbox padding; align polygon exactly to visible video
+ const scale=Math.min(cw/v.videoWidth,ch/v.videoHeight),ox=(cw-v.videoWidth*scale)/2,oy=(ch-v.videoHeight*scale)/2;
+ const w=v.videoWidth,h=v.videoHeight;
+ const raw=liveQuad||[[w*.09,h*.09],[w*.91,h*.09],[w*.91,h*.91],[w*.09,h*.91]];
+ const p=raw.map(q=>[ox+q[0]*scale,oy+q[1]*scale]);const found=!!liveQuad;
+ g.strokeStyle=found?'#22f66d':'#ffdb35';g.lineWidth=3;g.lineJoin='round';g.shadowColor=found?'#00ff7499':'#ffce4077';g.shadowBlur=10;
+ g.beginPath();p.forEach((q,i)=>i?g.lineTo(...q):g.moveTo(...q));g.closePath();g.stroke();g.shadowBlur=0;
+ for(const q of p){g.beginPath();g.arc(q[0],q[1],5.5,0,Math.PI*2);g.fillStyle='#fff';g.fill();g.stroke()}
+ const status=$('liveStatus');status.classList.toggle('found',found);
+ const message=found?'✓ ตรวจพบขอบเอกสารแล้ว — กดถ่ายได้เลย':cvReady?'กำลังติดตามขอบเอกสาร — เล็งให้เห็นครบทั้ง 4 มุม':'กำลังโหลดตัวตรวจจับขอบ — กรอบเหลืองช่วยเล็ง';
+ if(status.textContent!==message)status.textContent=message;
 }
 function liveScan(timestamp){
  if(!liveRunning)return;
@@ -137,6 +172,9 @@ function liveScan(timestamp){
  liveRaf=requestAnimationFrame(liveScan);
 }
 $('closeCamera').onclick=()=>{stopLive();show(pages.length?'pages':'home')};
+$('cameraGallery').onclick=()=>{$('galleryInput').click()};
+$('cameraPages').onclick=()=>{if(!pages.length){alert('ยังไม่มีรูปที่สแกน');return}stopLive();renderPages();show('pages')};
+document.querySelectorAll('.cam-mode').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.cam-mode').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(btn.dataset.kind==='card'||btn.dataset.kind==='photo')$('liveStatus').textContent='เล็งเอกสารในกรอบแล้วกดถ่าย • สามารถปรับมุมได้หลังถ่าย';});
 $('takePhoto').onclick=()=>{const v=$('liveVideo');if(!v.videoWidth){alert('กล้องยังไม่พร้อม');return}const scale=Math.min(1,MAX_SIZE/Math.max(v.videoWidth,v.videoHeight));const c=document.createElement('canvas');c.width=Math.round(v.videoWidth*scale);c.height=Math.round(v.videoHeight*scale);c.getContext('2d').drawImage(v,0,0,c.width,c.height);const p=liveQuad?liveQuad.map(q=>q.map(n=>n*scale)):null;stopLive();startFromCanvas(c,p)};
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&liveRunning){stopLive();if(!$('camera').classList.contains('hide'))show('home')}});
 
