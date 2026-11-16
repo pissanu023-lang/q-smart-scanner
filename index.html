@@ -2,7 +2,12 @@
 <html lang="th">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0868db"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Q Smart Scanner</title>
+<title>Q DOC TOOLS</title>
+<meta name="apple-mobile-web-app-title" content="Q DOC TOOLS">
+<meta name="application-name" content="Q DOC TOOLS">
+<meta name="description" content="Q DOC TOOLS สแกนเอกสาร ปรับมุม บันทึกและแชร์ JPG PDF">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif;color:#102a51;background:#eaf3ff}*{box-sizing:border-box}body{margin:0;min-height:100vh}button,input{font:inherit}button{cursor:pointer;border:0}.app{max-width:600px;margin:0 auto;min-height:100vh;background:#f3f8ff;box-shadow:0 0 30px #25588818}.top{background:linear-gradient(130deg,#0751c7,#129af5);color:white;padding:28px 20px 24px;border-radius:0 0 30px 30px}.brand{display:flex;align-items:center;gap:14px;font-size:26px;font-weight:800;line-height:1.1}.brand-icon{font-size:38px}.sub{margin:10px 0 0;font-size:14px;opacity:.9}.main{padding:18px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{background:white;border-radius:19px;box-shadow:0 4px 16px #1260be14;padding:19px 11px;min-height:112px;color:#18365e;text-align:center;border:1px solid #e8eef8}.tile .emoji{font-size:36px;display:block;margin-bottom:8px}.tile b{display:block;font-size:15px}.tile small{display:block;color:#67819e;font-size:12px;margin-top:3px}.panel{background:white;border-radius:22px;box-shadow:0 5px 20px #1353ad13;padding:17px;margin-top:16px}.panel h2{font-size:17px;margin:0 0 12px}.muted{color:#67819e;font-size:13px}.list{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:9px 0;border-top:1px solid #eef3fa}.list:first-of-type{border-top:0}.primary{background:#0878ea;color:white;border-radius:12px;padding:12px 15px;font-weight:700}.secondary{background:#e9f2ff;color:#0767d1;border-radius:12px;padding:11px 14px;font-weight:700}.danger{background:#fff0f0;color:#d33;border-radius:10px;padding:9px 11px}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.actions>button{flex:1;min-width:110px}.hide{display:none!important}.preview-wrap{position:relative;background:#15243b;border-radius:16px;overflow:hidden;touch-action:none;line-height:0}.preview-wrap canvas{width:100%;height:auto;display:block;touch-action:none}.hint{font-size:13px;color:#496487;line-height:1.6;margin:12px 0}.modes{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.mode{border:1px solid #cde1f9;color:#35649d;background:#f3f8ff;padding:9px 12px;border-radius:12px}.mode.active{background:#086dd7;color:white;border-color:#086dd7}.thumbs{display:flex;gap:8px;overflow:auto;padding:5px 0}.thumb{position:relative;flex:none;background:#e4edf9;border:2px solid transparent;border-radius:9px;overflow:hidden}.thumb.active{border-color:#0878ea}.thumb img{width:69px;height:91px;object-fit:contain;display:block}.thumb span{position:absolute;bottom:2px;right:3px;background:#10315eb5;color:white;font-size:11px;padding:1px 4px;border-radius:4px}.status{font-size:13px;color:#416991;min-height:20px;margin-top:8px}.badge{display:inline-block;background:#e0fff0;color:#118a53;border-radius:99px;padding:6px 10px;font-size:12px;font-weight:700}.footer{padding:16px 0 22px;text-align:center;color:#7792b2;font-size:12px}.loading{opacity:.55;pointer-events:none}
@@ -41,13 +46,39 @@
 .capture-shutter:active{transform:scale(.96)}.camera-help{text-align:center;color:#6c82a0;font-size:11px;line-height:1.7;margin:10px 2px}
 #pages .actions button{min-width:45%;font-size:13px}
 @media(max-width:370px){.camera-box{max-height:54dvh}.cam-mode{font-size:11px;padding:9px 4px}.capture-shutter{width:70px;height:70px}}
+
+/* Q DOC TOOLS V4 visual refresh — preserves existing scanning engine */
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif;color:#18365b;background:#dceafc}
+body{background:linear-gradient(145deg,#d8eaff,#f5f9ff)}
+.app{background:#f5f9ff;box-shadow:0 12px 55px #153f8530}
+.top{background:linear-gradient(125deg,#0853c6 0%,#0b88ed 72%,#5dbefa 100%);position:relative;overflow:hidden;padding:22px 20px 23px;box-shadow:0 7px 22px #1375ce2b}
+.top:after{content:"";position:absolute;right:-80px;bottom:-90px;width:240px;height:180px;border-radius:50%;border:28px solid #ffffff20;pointer-events:none}
+.brand{position:relative;z-index:1;font-size:25px;letter-spacing:-.45px;gap:13px}
+.brand-logo{width:61px;height:61px;object-fit:cover;border-radius:17px;box-shadow:0 4px 14px #06295955;border:2px solid #ffffffab}
+.sub{position:relative;z-index:1;font-size:13px;line-height:1.5;margin-top:9px}
+.main{padding:15px 14px 24px}
+.grid{gap:11px}
+.tile{min-height:118px;border-radius:21px;padding:18px 8px;background:linear-gradient(155deg,#fff,#eef6ff);box-shadow:0 5px 16px #1d5ca618;border:1px solid #e0ebfa;transition:transform .13s ease,box-shadow .13s ease}
+.tile:active{transform:scale(.975)}
+.tile:first-child{background:linear-gradient(145deg,#168cff,#065cd5);color:white;border:1px solid #7bbfff;box-shadow:0 7px 20px #1676e85c}
+.tile:first-child small{color:#e0f0ff}
+.tile .emoji{font-size:36px;margin-bottom:9px}
+.tile b{font-size:15px;line-height:1.4}
+.panel{border:1px solid #e4eefa;box-shadow:0 5px 19px #17509a12;border-radius:20px}
+.primary{background:linear-gradient(150deg,#138cff,#065fda);box-shadow:0 3px 11px #126de32b}
+.secondary{background:#e9f3ff;color:#075bc9}
+button:focus-visible{outline:3px solid #16c8df;outline-offset:3px}
+.footer{line-height:1.7;padding-bottom:30px}
+.camera-heading{padding:7px 5px 12px}
+.camera-box{border:4px solid white;box-shadow:0 5px 19px #174e902e}
+@media(max-width:380px){.brand{font-size:22px}.brand-logo{width:54px;height:54px}.tile{min-height:108px;padding:13px 6px}}
 </style>
 </head>
-<body><div class="app"><header class="top"><div class="brand"><span class="brand-icon">▣</span><span>Q Smart<br>Scanner</span></div><p class="sub">สแกนเอกสารง่าย ๆ • ปรับมุมกระดาษ • บันทึก PDF</p></header>
+<body><div class="app"><header class="top"><div class="brand"><img class="brand-logo" src="icon-192.png" alt="Q DOC TOOLS"><span>Q DOC<br>TOOLS</span></div><p class="sub">สแกน • ปรับภาพ • จัดการเอกสาร • JPG / PDF</p></header>
 <main class="main">
 <section id="home"><div class="grid"><button class="tile" id="cameraBtn"><span class="emoji">📷</span><b>สแกนเอกสาร</b><small>ถ่ายด้วยกล้อง</small></button><button class="tile" id="galleryBtn"><span class="emoji">🏞️</span><b>เลือกรูปจากเครื่อง</b><small>นำรูปมาแปลง</small></button><button class="tile" id="pdfHome"><span class="emoji">📕</span><b>บันทึกเป็น PDF</b><small>รวมเอกสารหลายหน้า</small></button><button class="tile" id="imageHome"><span class="emoji">🖼️</span><b>บันทึกเป็นรูปภาพ</b><small>JPG คุณภาพสูง</small></button><button class="tile" id="moreHome"><span class="emoji">📑</span><b>สแกนหลายหน้า</b><small>ถ่ายเพิ่มต่อเนื่อง</small></button><button class="tile" id="filesHome"><span class="emoji">📂</span><b>ไฟล์ของฉัน</b><small>ดูภาพที่สแกนในครั้งนี้</small></button></div><div class="panel"><span class="badge">✓ ใช้งานบน iPhone ได้</span><p class="hint" style="margin-bottom:0">✓ ตรวจหาขอบกระดาษอัตโนมัติ<br>✓ ดึงมุมเอกสารให้ตรงเหมือนถ่ายจากด้านบน<br>✓ ปรับมุมเองด้วยการลากจุดสีเขียว<br>✓ รวมหลายหน้าเป็น PDF ไฟล์เดียว</p></div></section>
 <section id="camera" class="hide camera-screen">
-<div class="camera-heading"><button class="back-btn" id="closeCamera" aria-label="ย้อนกลับ">‹</button><div><strong>สแกนเอกสาร</strong><small>Q Smart Scanner • กล้องแนวตั้ง</small></div><span class="live-chip" id="liveChip">● LIVE</span></div>
+<div class="camera-heading"><button class="back-btn" id="closeCamera" aria-label="ย้อนกลับ">‹</button><div><strong>สแกนเอกสาร</strong><small>Q DOC TOOLS • กล้องแนวตั้ง</small></div><span class="live-chip" id="liveChip">● LIVE</span></div>
 <div class="camera-box" id="cameraBox"><video id="liveVideo" autoplay playsinline muted></video><canvas id="liveOverlay"></canvas><div class="live-topbar"><span>⚡ อัตโนมัติ</span><span id="cameraCount">0 หน้า</span></div><div class="camera-bottom-status" id="liveStatus">กำลังเปิดกล้อง…</div></div>
 <div class="mode-row"><button class="cam-mode active" data-kind="document">▤ เอกสาร</button><button class="cam-mode" data-kind="card">▣ บัตร</button><button class="cam-mode" data-kind="multi">▤ หลายหน้า</button><button class="cam-mode" data-kind="photo">▧ รูปภาพ</button></div>
 <div class="capture-row"><button class="capture-side" id="cameraPages" aria-label="ดูหน้าที่สแกน"><span class="capture-icon">▤</span><b id="cameraPageCount">0 หน้า</b></button><button class="capture-shutter" id="takePhoto" aria-label="ถ่ายเอกสาร"><span>📷</span></button><button class="capture-side" id="cameraGallery" aria-label="เลือกรูปจากเครื่อง"><span class="capture-icon">▧</span><b>เลือกรูป</b></button></div>
@@ -57,7 +88,7 @@
 <section id="result" class="hide"><div class="panel" style="margin-top:0"><h2>ตัวอย่างเอกสารที่สแกน</h2><div class="preview-wrap" style="background:#dde8f8;touch-action:auto"><canvas id="resultCanvas"></canvas></div><div class="modes" id="modes"><button class="mode active" data-mode="color">สี</button><button class="mode" data-mode="gray">ขาวดำ</button><button class="mode" data-mode="document">เอกสารคมชัด</button></div><div class="actions"><button class="secondary" id="editCorners">↶ ปรับมุมใหม่</button><button class="primary" id="keepPage">✓ เก็บหน้านี้</button></div></div></section>
 <section id="pages" class="panel hide"><h2>📑 เอกสารของฉัน <span class="muted" id="count">0 หน้า</span></h2><div class="thumbs" id="thumbs"></div><p class="hint">แตะรูปเล็กเพื่อดูหน้า • PDF จะเรียงหน้าตามลำดับที่สแกน</p><div class="actions"><button class="secondary" id="addPage">＋ เพิ่มหน้า</button><button class="primary" id="savePDF">📕 บันทึก PDF</button><button class="secondary" id="sharePDF">📤 แชร์ไฟล์ PDF</button><button class="secondary" id="saveJPG">🖼️ ดาวน์โหลด JPG</button><button class="secondary" id="sharePhoto">📲 แชร์รูปที่เลือก</button><button class="primary" id="shareAllPhotos">🌈 แชร์หลายรูปเข้าแกลเลอรี</button></div><div class="actions" style="margin-top:8px"><button class="danger" id="deletePage">ลบหน้าที่เลือก</button><button class="secondary" id="newScan">กลับหน้าแรก</button></div><div class="status" id="saveStatus"></div></section>
 <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hide"><input id="galleryInput" type="file" accept="image/*" multiple class="hide">
-<footer class="footer">Q Smart Scanner • เอกสารประมวลผลในเครื่องของคุณ<br>ฟังก์ชันตรวจขอบอัตโนมัติต้องใช้อินเทอร์เน็ตเพื่อโหลดตัวประมวลผลครั้งแรก</footer></main></div>
+<footer class="footer">Q DOC TOOLS • เอกสารประมวลผลในเครื่องของคุณ<br>ฟังก์ชันตรวจขอบอัตโนมัติต้องใช้อินเทอร์เน็ตเพื่อโหลดตัวประมวลผลครั้งแรก</footer></main></div>
 <script src="https://docs.opencv.org/4.x/opencv.js" async onload="cvScriptLoaded()" onerror="cvLoadFailed()"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script>
@@ -207,13 +238,13 @@ async function buildPdfBlob(){
  }
  return doc.output('blob');
 }
-async function savePdf(){try{const blob=await buildPdfBlob();downloadBlob(blob,'Q-Smart-Scanner.pdf');$('saveStatus').textContent='ดาวน์โหลด PDF รวม '+pages.length+' หน้าแล้ว'}catch(e){alert(e.message||'สร้าง PDF ไม่สำเร็จ')}}
+async function savePdf(){try{const blob=await buildPdfBlob();downloadBlob(blob,'Q-DOC-TOOLS.pdf');$('saveStatus').textContent='ดาวน์โหลด PDF รวม '+pages.length+' หน้าแล้ว'}catch(e){alert(e.message||'สร้าง PDF ไม่สำเร็จ')}}
 async function sharePdf(){
  const btn=$('sharePDF');btn.disabled=true;
  try{
-  const file=new File([await buildPdfBlob()],'Q-Smart-Scanner.pdf',{type:'application/pdf'});
+  const file=new File([await buildPdfBlob()],'Q-DOC-TOOLS.pdf',{type:'application/pdf'});
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-   await navigator.share({files:[file],title:'Q Smart Scanner PDF'});
+   await navigator.share({files:[file],title:'Q DOC TOOLS PDF'});
    $('saveStatus').textContent='เปิดเมนูแชร์ PDF แล้ว เลือก LINE, AirDrop หรือ “บันทึกไปยังไฟล์” ได้';
   }else{
    downloadBlob(file,file.name);
@@ -226,7 +257,7 @@ async function sharePdf(){
 async function shareJpg(){
  if(!pages.length){alert('กรุณาสแกนเอกสารก่อน');return}
  const file=new File([dataBlob(pages[selected])],`Q-Scan-page-${selected+1}.jpg`,{type:'image/jpeg'});
- try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Q Smart Scanner'});$('saveStatus').textContent='เลือก “บันทึกรูปภาพ” ในเมนูแชร์ เพื่อเก็บลงแอปรูปภาพ';return}}
+ try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Q DOC TOOLS'});$('saveStatus').textContent='เลือก “บันทึกรูปภาพ” ในเมนูแชร์ เพื่อเก็บลงแอปรูปภาพ';return}}
  catch(e){if(e.name==='AbortError')return}
  downloadBlob(file,file.name);$('saveStatus').textContent='ดาวน์โหลดภาพแล้ว เปิดภาพแล้วเลือก แชร์ → บันทึกรูปภาพ หากต้องการเพิ่มเข้าอัลบั้ม';
 }
@@ -237,7 +268,7 @@ async function shareAllPhotos(){
   // แต่ละหน้าจะเป็นไฟล์ JPG แยกกัน ไม่รวมเป็นภาพเดียว
   const files=pages.map((data,i)=>new File([dataBlob(data)],`Q-Scan-page-${String(i+1).padStart(2,'0')}.jpg`,{type:'image/jpeg'}));
   if(navigator.share&&navigator.canShare&&navigator.canShare({files})){
-   await navigator.share({files,title:'Q Smart Scanner - '+files.length+' รูป'});
+   await navigator.share({files,title:'Q DOC TOOLS - '+files.length+' รูป'});
    $('saveStatus').textContent='เปิดเมนูแชร์ '+files.length+' รูปแล้ว หากต้องการเก็บในแอปรูปภาพให้เลือก “บันทึก '+files.length+' รูปภาพ” (ชื่อเมนูอาจต่างกัน)';
   }else{
    $('saveStatus').textContent='เบราว์เซอร์นี้ไม่รองรับแชร์หลายไฟล์พร้อมกัน ลองเปิดผ่าน Safari บน iPhone หรือใช้ปุ่มบันทึก PDF';
